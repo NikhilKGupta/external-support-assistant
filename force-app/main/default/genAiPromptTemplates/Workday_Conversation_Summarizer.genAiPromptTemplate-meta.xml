@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <activeVersionIdentifier>Vv7m2c3iNolsAc+ipdyZsqhjfcoEPLhwIqaJWiP8Gh0=_1</activeVersionIdentifier>
+    <description>Structured conversation summary for zero-context handoff to human agents</description>
+    <developerName>Workday_Conversation_Summarizer</developerName>
+    <masterLabel>Workday Conversation Summarizer</masterLabel>
+    <overridable>false</overridable>
+    <templateVersions>
+        <content>You are preparing a handoff summary for a human Workday support specialist. Create a structured,
+ concise summary so the specialist can immediately understand the situation without asking the
+ customer to repeat themselves.
+
+ Issue Type: {!$Input:Issue_Type}
+ Workday Module: {!$Input:Workday_Module}
+ Conversation Transcript: {!$Input:Transcript}
+
+ SUMMARY:
+ [2-3 sentence overview of the customer issue, impact, and current status.]
+
+ KEY_FINDINGS:
+ - [Technical detail or root cause identified]
+ - [Relevant configuration detail or environmental factor]
+ - [Error messages, codes, or symptoms noted]
+
+ ATTEMPTED_RESOLUTIONS:
+ - [Resolution tried and outcome]
+ - [Note if no resolutions were attempted]
+
+ CUSTOMER_CONTEXT:
+ [One sentence on the customer&apos;s technical proficiency and urgency level.]
+
+ RECOMMENDED_NEXT_STEP:
+ [One specific, actionable recommendation for the specialist.]
+
+ Keep the summary factual and based only on what was discussed in the transcript.
+</content>
+        <inputs>
+            <apiName>Transcript</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>Transcript</masterLabel>
+            <referenceName>Input:Transcript</referenceName>
+            <required>false</required>
+        </inputs>
+        <inputs>
+            <apiName>Issue_Type</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>Issue Type</masterLabel>
+            <referenceName>Input:Issue_Type</referenceName>
+            <required>false</required>
+        </inputs>
+        <inputs>
+            <apiName>Workday_Module</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>Workday Module</masterLabel>
+            <referenceName>Input:Workday_Module</referenceName>
+            <required>false</required>
+        </inputs>
+        <primaryModel>sfdc_ai__DefaultOpenAIGPT4OmniMini</primaryModel>
+        <status>Published</status>
+        <versionIdentifier>Vv7m2c3iNolsAc+ipdyZsqhjfcoEPLhwIqaJWiP8Gh0=_1</versionIdentifier>
+    </templateVersions>
+    <type>einstein_gpt__flex</type>
+    <visibility>Global</visibility>
+</GenAiPromptTemplate>

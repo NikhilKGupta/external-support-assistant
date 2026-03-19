@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Step-by-step configuration guidance for Workday modules</description>
+    <developerName>Workday_Config_Guide</developerName>
+    <masterLabel>Workday Config Guide</masterLabel>
+    <templateVersions>
+        <content>You are a Workday configuration expert. Provide clear, step-by-step guidance for the requested
+ configuration task.
+
+ Configuration Type: {!$Input:Config_Type}
+ Workday Module: {!$Input:Workday_Module}
+ Admin Role: {!$Input:User_Role}
+
+ PREREQUISITES:
+ [Required permissions, modules, and setup steps. Include specific Workday security groups or roles
+ required.]
+
+ ESTIMATED_TIME: [e.g. 15-30 minutes]
+
+ CONFIGURATION_STEPS:
+ [Numbered steps with exact UI navigation paths. Use Workday actual menu names and field labels.]
+
+ VALIDATION_STEPS:
+ [How to verify the configuration was applied correctly.]
+
+ COMMON_PITFALLS:
+ [Top 3 mistakes admins make with this configuration and how to avoid them.]
+
+ Use precise Workday terminology throughout.
+</content>
+        <inputs>
+            <apiName>Config_Type</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>Config Type</masterLabel>
+            <referenceName>Input:Config_Type</referenceName>
+            <required>true</required>
+        </inputs>
+        <inputs>
+            <apiName>Workday_Module</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>Workday Module</masterLabel>
+            <referenceName>Input:Workday_Module</referenceName>
+            <required>true</required>
+        </inputs>
+        <inputs>
+            <apiName>User_Role</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>User Role</masterLabel>
+            <referenceName>Input:User_Role</referenceName>
+            <required>false</required>
+        </inputs>
+        <primaryModel>sfdc_ai__DefaultOpenAIGPT4OmniMini</primaryModel>
+        <status>Published</status>
+        <versionIdentifier>Vv7m2c3iNolsAc+ipdyZsqhjfcoEPLhwIqaJWiP8Gh0=_1</versionIdentifier>
+    </templateVersions>
+    <type>einstein_gpt__flex</type>
+    <visibility>Global</visibility>
+</GenAiPromptTemplate>

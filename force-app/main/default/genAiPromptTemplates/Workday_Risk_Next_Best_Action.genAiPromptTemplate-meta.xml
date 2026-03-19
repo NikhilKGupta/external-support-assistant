@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPromptTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Next Best Action recommendations for high-risk Workday support cases</description>
+    <developerName>Workday_Risk_Next_Best_Action</developerName>
+    <masterLabel>Workday Risk Next Best Action</masterLabel>
+    <templateVersions>
+        <content>You are a senior Workday support strategist. Analyse this support case and recommend a specific,
+ actionable Next Best Action to prevent escalation.
+
+ Case Summary: {!$Input:Case_Summary}
+ Risk Score: {!$Input:Risk_Score} out of 100
+ Account Tier: {!$Input:Account_Tier}
+ Days Open: {!$Input:Days_Open}
+
+ RECOMMENDATION:
+ [One specific, actionable instruction. Start with an action verb. Include who, what, and by when.]
+
+ URGENCY: [Critical / High / Medium]
+
+ REASONING:
+ [2-3 sentences explaining why this action given the risk score, account tier, and case age.]
+
+ Options to consider: direct customer outreach, engineering escalation, management escalation,
+ workaround provision, priority reprioritisation, or executive briefing for Enterprise accounts at
+ Critical risk.
+</content>
+        <inputs>
+            <apiName>Case_Summary</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>Case Summary</masterLabel>
+            <referenceName>Input:Case_Summary</referenceName>
+            <required>true</required>
+        </inputs>
+        <inputs>
+            <apiName>Risk_Score</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>Risk Score</masterLabel>
+            <referenceName>Input:Risk_Score</referenceName>
+            <required>true</required>
+        </inputs>
+        <inputs>
+            <apiName>Account_Tier</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>Account Tier</masterLabel>
+            <referenceName>Input:Account_Tier</referenceName>
+            <required>false</required>
+        </inputs>
+        <inputs>
+            <apiName>Days_Open</apiName>
+            <definition>primitive://String</definition>
+            <masterLabel>Days Open</masterLabel>
+            <referenceName>Input:Days_Open</referenceName>
+            <required>false</required>
+        </inputs>
+        <primaryModel>sfdc_ai__DefaultOpenAIGPT4OmniMini</primaryModel>
+        <status>Published</status>
+        <versionIdentifier>Vv7m2c3iNolsAc+ipdyZsqhjfcoEPLhwIqaJWiP8Gh0=_1</versionIdentifier>
+    </templateVersions>
+    <type>einstein_gpt__flex</type>
+    <visibility>Global</visibility>
+</GenAiPromptTemplate>
