@@ -1,0 +1,20 @@
+SELECT "KQ_Id__c",
+	   "KQ_PreviousSessionId__c",
+	   "ssot__AiAgentChannelType__c",
+	   "ssot__AiAgentSessionEndType__c",
+	   "ssot__DataSourceId__c",
+	   "ssot__DataSourceObjectId__c",
+	   "ssot__EndTimestamp__c",
+	   "ssot__ExternalSourceId__c",
+	   "ssot__Id__c",
+	   "ssot__IndividualId__c",
+	   "ssot__InternalOrganizationId__c",
+	   "ssot__PreviousSessionId__c",
+	   "ssot__RelatedMessagingSessionId__c",
+	   "ssot__RelatedVoiceCallId__c",
+	   "ssot__SessionOwnerId__c",
+	   "ssot__SessionOwnerObject__c",
+	   "ssot__StartTimestamp__c",
+	   "ssot__VariableText__c" 
+FROM "ssot__AiAgentSession__dlm" 
+WHERE "ssot__Id__c" = '019d1161-b33c-78db-a9cb-20f180c9fcc2'

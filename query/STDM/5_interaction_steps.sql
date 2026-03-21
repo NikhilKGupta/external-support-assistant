@@ -1,0 +1,27 @@
+SELECT "KQ_AiAgentInteractionId__c",
+	   "KQ_Id__c",
+	   "KQ_PrevStepId__c",
+	   "ssot__AiAgentInteractionId__c",
+	   "ssot__AiAgentInteractionStepType__c",
+	   "ssot__AttributeText__c",
+	   "ssot__DataSourceId__c",
+	   "ssot__DataSourceObjectId__c",
+	   "ssot__EndTimestamp__c",
+	   "ssot__ErrorMessageText__c",
+	   "ssot__ExternalSourceId__c",
+	   "ssot__GenAiGatewayRequestId__c",
+	   "ssot__GenAiGatewayResponseId__c",
+	   "ssot__GenerationId__c",
+	   "ssot__Id__c",
+	   "ssot__InputValueText__c",
+	   "ssot__InternalOrganizationId__c",
+	   "ssot__Name__c",
+	   "ssot__OutputValueText__c",
+	   "ssot__PostStepVariableText__c",
+	   "ssot__PreStepVariableText__c",
+	   "ssot__PrevStepId__c",
+	   "ssot__StartTimestamp__c",
+	   "ssot__TelemetryTraceSpanId__c" 
+FROM "ssot__AiAgentInteractionStep__dlm" 
+WHERE "ssot__AiAgentInteractionId__c" = '470475f9-842d-ba24-95a0-27d98f8c264c'
+ORDER BY "ssot__StartTimestamp__c"

@@ -1,0 +1,21 @@
+SELECT "KQ_AiAgentSessionId__c",
+	   "KQ_Id__c",
+	   "ssot__AiAgentApiName__c",
+	   "ssot__AiAgentSessionId__c",
+	   "ssot__AiAgentSessionParticipantRole__c",
+	   "ssot__AiAgentTemplateApiName__c",
+	   "ssot__AiAgentType__c",
+	   "ssot__AiAgentVersionApiName__c",
+	   "ssot__DataSourceId__c",
+	   "ssot__DataSourceObjectId__c",
+	   "ssot__EndTimestamp__c",
+	   "ssot__ExternalSourceId__c",
+	   "ssot__Id__c",
+	   "ssot__IndividualId__c",
+	   "ssot__InternalOrganizationId__c",
+	   "ssot__ParticipantAttributeText__c",
+	   "ssot__ParticipantId__c",
+	   "ssot__ParticipantObject__c",
+	   "ssot__StartTimestamp__c" 
+FROM "ssot__AiAgentSessionParticipant__dlm" 
+WHERE "ssot__AiAgentSessionId__c" = '019d1161-b33c-78db-a9cb-20f180c9fcc2'
