@@ -5,16 +5,22 @@ system:
         error: "Sorry, something went wrong. Please try again."
 
 config:
+    agent_label: "Workday Support Agent"
     developer_name: "Workday_Support_Agent"
     agent_type: "AgentforceServiceAgent"
-    default_agent_user: "workday_support_agent@00DHu00000yNLTtMAO.ext"
+    default_agent_user: "workday_support_agent@00dhu00000ynlttmao.ext"
     description: "Service agent for Workday customer admins via ESA_Deployment community portal. Handles troubleshooting and configuration with seamless case creation and zero-context escalation."
 
-connection messaging:
-    escalation_message: "Connecting you with a Workday support specialist now. They will have full context of our conversation and your case details."
-    outbound_route_type: "OmniChannelFlow"
-    outbound_route_name: "flow://Route_Workday_To_Queue"
-    adaptive_response_allowed: False
+
+language:
+    default_locale: "en_US"
+    additional_locales: "en_GB"
+    all_additional_locales: False
+
+knowledge:
+    rag_feature_config_id: "ARFPC_1JDHu000000GoJNOA0"
+    citations_enabled: False
+    citations_url: ""
 
 variables:
     # Community portal authentication
@@ -28,6 +34,16 @@ variables:
     # Session identity
     admin_name: mutable string = ""
     support_tier: mutable string = ""
+    identity_verified: mutable boolean = False
+        description: "True when the user is authenticated and verified in the portal session"
+
+    # Knowledge-first controls
+    knowledge_first_enabled: mutable boolean = True
+        description: "Enable knowledge-first behavior when identity_verified is True"
+    knowledge_confidence_threshold: mutable string = "high"
+        description: "Confidence threshold for accepting grounded answers: high or medium"
+    # last_rag_score: mutable number = 0
+    #     description: "Score from last RAG retrieval for telemetry"
 
     # Issue classification
     issue_type: mutable string = ""
@@ -50,10 +66,12 @@ variables:
     # Escalation latch
     escalation_initiated: mutable boolean = False
 
-language:
-    default_locale: "en_US"
-    additional_locales: ""
-    all_additional_locales: False
+
+connection messaging:
+    escalation_message: "Connecting you with a Workday support specialist now. They will have full context of our conversation and your case details."
+    outbound_route_type: "OmniChannelFlow"
+    outbound_route_name: "flow://Route_Workday_To_Queue"
+    adaptive_response_allowed: False
 
 start_agent topic_router:
     description: "Entry point that loads customer context and routes to troubleshooting or configuration"
@@ -64,6 +82,10 @@ start_agent topic_router:
                 with account_id = @variables.admin_account_id
                 set @variables.admin_name = @outputs.admin_name
                 set @variables.support_tier = @outputs.support_tier
+
+            # Derive identity segment from presence of ContactId and loaded context
+            if @variables.ContactId is not None:
+                set @variables.identity_verified = True
 
             if @variables.admin_name != "":
                 | Welcome back, {!@variables.admin_name}!
@@ -99,6 +121,17 @@ topic troubleshooting:
     description: "Diagnose and resolve Workday issues using the knowledge base; create cases when unresolvable"
     reasoning:
         instructions: ->
+            # Knowledge-first grounding for identity-verified users
+            if @variables.identity_verified and @variables.knowledge_first_enabled:
+                run @actions.stream_knowledge_search
+                    # with citationsEnabled = @knowledge.citations_enabled
+                    # with citationsUrl = @knowledge.citations_url
+                    with query = "..."
+                    # with ragFeatureConfigId = @knowledge.rag_feature_config_id
+                    # set @variables.last_rag_score = @outputs.knowledgeSummary # Placeholder score mapping if provided
+                | If the retrieved knowledge is sufficiently confident per {!@variables.knowledge_confidence_threshold} threshold, answer directly with the grounded summary. Include citations when enabled.
+                | If confidence is below threshold or no relevant result, proceed with normal troubleshooting flow.
+
             | Please describe the Workday issue you are experiencing. Include:
             | - Which Workday module (HCM, Financials, Payroll, etc.)
             | - What you were trying to do when the issue occurred
@@ -109,6 +142,19 @@ topic troubleshooting:
             | I will create a support case and connect you with a specialist.
 
         actions:
+            tool_stream_knowledge_search: @actions.stream_knowledge_search
+                with citationsEnabled = @knowledge.citations_enabled
+                with citationsUrl = @knowledge.citations_url
+                with query = ...
+                with ragFeatureConfigId = @knowledge.rag_feature_config_id
+                # available when @variables.identity_verified and @variables.knowledge_first_enabled
+                # # Log decision after call
+                # run @actions.log_knowledge_decision
+                #     with query = "..."
+                #     with top_document_title = @outputs.knowledgeSummary
+                #     with score = 0
+                #     with used_answer = False
+
             search_kb: @actions.search_knowledge_base
                 description: "Search the knowledge base for a solution to this issue"
                 available when @variables.issue_summary != ""
@@ -141,8 +187,75 @@ topic troubleshooting:
                 description: "Return to the main menu"
 
     actions:
+        stream_knowledge_search:
+            description: |
+                Answers questions about company policies and procedures, troubleshooting steps, or product information. For example: “What is your return policy?” “How do I fix an issue?” or “What features does a product have?”
+            label: "Answer Questions with Knowledge"
+            require_user_confirmation: False
+            include_in_progress_indicator: True
+            progress_indicator_message: "Getting answers"
+            source: "EmployeeCopilot__AnswerQuestionsWithKnowledge"
+            target: "standardInvocableAction://streamKnowledgeSearch"
+
+            inputs:
+                "query": string
+                    description: |
+                      Required. A string created by generative AI to be used in the knowledge article search.
+                    label: "Query"
+                    is_required: True
+                    is_user_input: True
+                "citationsUrl": string
+                    description: |
+                      The URL to use for citations for custom Agents.
+                    label: "Citations Url"
+                    is_required: False
+                    is_user_input: True
+                "ragFeatureConfigId": string
+                    description: |
+                      The RAG Feature ID to use for grounding this copilot action invocation.
+                    label: "RAG Feature Configuration Id"
+                    is_required: False
+                    is_user_input: True
+                "citationsEnabled": boolean
+                    description: |
+                      Whether or not citations are enabled.
+                    label: "Citations Enabled"
+                    is_required: False
+                    is_user_input: True
+
+            outputs:
+                "knowledgeSummary": object
+                    description: |
+                      A string formatted as rich text that includes a summary of the information retrieved from the knowledge articles and citations to those articles.
+                    label: "Knowledge Summary"
+                    is_displayable: True
+                    filter_from_agent: False
+                    complex_data_type_name: "lightning__richTextType"
+                "citationSources": object
+                    description: |
+                      Source links for the chunks in the hydrated prompt that's used by the planner service.
+                    label: "Citation Sources"
+                    is_displayable: False
+                    filter_from_agent: False
+                    complex_data_type_name: "@apexClassType/AiCopilot__GenAiCitationInput"
+
+        # log_knowledge_decision:
+        #     description: "Log knowledge decision with library id and retrieval score"
+        #     inputs:
+        #         query: string
+        #         top_document_title: string
+        #         score: number
+        #         used_answer: boolean
+        #     target: "flow://Log_Knowledge_Decision_Placeholder"
+
         search_knowledge_base:
             description: "Search the Workday knowledge base for solutions to the reported issue"
+            inputs:
+                "Input:Search_Query": string
+                    description: "Search query for the knowledge base"
+            outputs:
+                promptResponse: string
+                    description: "Knowledge base search results"
             target: "generatePromptResponse://Workday_KB_Search"
 
         summarize_conversation:
@@ -181,6 +294,17 @@ topic configuration_assistance:
     description: "Step-by-step configuration guidance for Workday modules with settings validation"
     reasoning:
         instructions: ->
+            # Knowledge-first grounding for identity-verified users
+            if @variables.identity_verified and @variables.knowledge_first_enabled:
+                run @actions.stream_knowledge_search
+                    # with citationsEnabled = @knowledge.citations_enabled
+                    # with citationsUrl = @knowledge.citations_url
+                    with query = "..."
+                    # with ragFeatureConfigId = @knowledge.rag_feature_config_id
+                    # set @variables.last_rag_score = @outputs.knowledgeSummary # Placeholder score mapping if provided
+                | If the retrieved knowledge is sufficiently confident per {!@variables.knowledge_confidence_threshold} threshold, answer directly with the grounded summary. Include citations when enabled.
+                | If confidence is below threshold or no relevant result, proceed with normal configuration flow.
+
             | I will guide you through configuring your Workday instance.
             |
             | What would you like to configure? Common areas include:
@@ -195,6 +319,18 @@ topic configuration_assistance:
                 | Let me retrieve the configuration guide for {!@variables.issue_type}...
 
         actions:
+            tool_stream_knowledge_search: @actions.stream_knowledge_search
+                with citationsEnabled = @knowledge.citations_enabled
+                with citationsUrl = @knowledge.citations_url
+                with query = ...
+                with ragFeatureConfigId = @knowledge.rag_feature_config_id
+                # available when @variables.identity_verified and @variables.knowledge_first_enabled
+                # run @actions.log_knowledge_decision
+                #     with query = "..."
+                #     with top_document_title = @outputs.knowledgeSummary
+                #     with score = 0
+                #     with used_answer = False
+
             get_guide: @actions.get_config_guide
                 description: "Get step-by-step configuration guidance"
                 available when @variables.issue_type != ""
@@ -212,6 +348,67 @@ topic configuration_assistance:
                 description: "Return to the main menu"
 
     actions:
+        stream_knowledge_search:
+            description: |
+                Answers questions about company policies and procedures, troubleshooting steps, or product information. For example: “What is your return policy?” “How do I fix an issue?” or “What features does a product have?”
+            label: "Answer Questions with Knowledge"
+            require_user_confirmation: False
+            include_in_progress_indicator: True
+            progress_indicator_message: "Getting answers"
+            source: "EmployeeCopilot__AnswerQuestionsWithKnowledge"
+            target: "standardInvocableAction://streamKnowledgeSearch"
+
+            inputs:
+                "query": string
+                    description: |
+                      Required. A string created by generative AI to be used in the knowledge article search.
+                    label: "Query"
+                    is_required: True
+                    is_user_input: True
+                "citationsUrl": string
+                    description: |
+                      The URL to use for citations for custom Agents.
+                    label: "Citations Url"
+                    is_required: False
+                    is_user_input: True
+                "ragFeatureConfigId": string
+                    description: |
+                      The RAG Feature ID to use for grounding this copilot action invocation.
+                    label: "RAG Feature Configuration Id"
+                    is_required: False
+                    is_user_input: True
+                "citationsEnabled": boolean
+                    description: |
+                      Whether or not citations are enabled.
+                    label: "Citations Enabled"
+                    is_required: False
+                    is_user_input: True
+
+            outputs:
+                "knowledgeSummary": object
+                    description: |
+                      A string formatted as rich text that includes a summary of the information retrieved from the knowledge articles and citations to those articles.
+                    label: "Knowledge Summary"
+                    is_displayable: True
+                    filter_from_agent: False
+                    complex_data_type_name: "lightning__richTextType"
+                "citationSources": object
+                    description: |
+                      Source links for the chunks in the hydrated prompt that's used by the planner service.
+                    label: "Citation Sources"
+                    is_displayable: False
+                    filter_from_agent: False
+                    complex_data_type_name: "@apexClassType/AiCopilot__GenAiCitationInput"
+
+        # log_knowledge_decision:
+        #     description: "Log knowledge decision with library id and retrieval score"
+        #     inputs:
+        #         query: string
+        #         top_document_title: string
+        #         score: number
+        #         used_answer: boolean
+        #     target: "flow://Log_Knowledge_Decision_Placeholder"
+
         get_config_guide:
             description: "Retrieve step-by-step configuration guidance for the requested Workday feature"
             target: "generatePromptResponse://Workday_Config_Guide"
@@ -317,10 +514,10 @@ topic escalation:
                 description: "Transfer to human Workday specialist"
                 available when @variables.escalation_initiated == True
 
-topic farewell:
-    description: "Close the conversation gracefully when the issue is resolved"
-    reasoning:
-        instructions: ->
-            | Thank you for contacting Workday Support!
-            | If you need further assistance, feel free to start a new chat anytime.
-            | Have a great day!
+# topic farewell:
+#     description: "Close the conversation gracefully when the issue is resolved"
+#     reasoning:
+#         instructions: ->
+#             | Thank you for contacting Workday Support!
+#             | If you need further assistance, feel free to start a new chat anytime.
+#             | Have a great day!
