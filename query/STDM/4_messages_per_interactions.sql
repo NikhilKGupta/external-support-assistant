@@ -20,5 +20,5 @@ SELECT "KQ_AiAgentInteractionId__c",
 	   "ssot__SessionOwnerId__c",
 	   "ssot__SessionOwnerObject__c" 
 FROM "ssot__AiAgentInteractionMessage__dlm"
-WHERE "ssot__AiAgentSessionId__c" = '019d1161-b33c-78db-a9cb-20f180c9fcc2'
+WHERE "ssot__AiAgentSessionId__c" = 'ffbf2564-06ba-48dc-88bc-5c89f2832067'
 ORDER BY "ssot__MessageSentTimestamp__c"

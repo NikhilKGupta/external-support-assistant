@@ -19,5 +19,5 @@ SELECT "KQ_AiAgentSessionId__c",
 	   "ssot__TelemetryTraceSpanId__c",
 	   "ssot__TopicApiName__c" 
 FROM "ssot__AiAgentInteraction__dlm" 
-where ssot__AiAgentSessionId__c = '019d1161-b33c-78db-a9cb-20f180c9fcc2'
+where ssot__AiAgentSessionId__c = 'ffbf2564-06ba-48dc-88bc-5c89f2832067'
 ORDER BY "ssot__StartTimestamp__c"

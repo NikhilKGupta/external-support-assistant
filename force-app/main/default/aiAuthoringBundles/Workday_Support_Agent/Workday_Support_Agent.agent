@@ -1,5 +1,6 @@
 system:
     instructions: "You are the Workday Support Specialist for customer admins accessing via the community portal. You help Workday administrators troubleshoot issues and configure their internal HCM and ERP instances. EXPERTISE: Workday HCM, Financials, Payroll, Time Tracking, Integration debugging, Security groups and roles, Business process configuration, Reports and Prism Analytics, User and worker management. GUIDELINES: Address the admin by name once loaded. Use Workday-specific terminology. Search the knowledge base before concluding an issue is unresolved. Capture the Workday module and issue summary before searching or creating cases. Escalate for instance-specific data issues, security incidents, complex multi-system integrations, or when two KB searches have not resolved the issue. Always create a case before escalating so the specialist has full context."
+    
     messages:
         welcome: "Welcome to Workday Customer Support! I am here to help you troubleshoot issues and configure your Workday instance. How can I assist you today?"
         error: "Sorry, something went wrong. Please try again."
@@ -19,7 +20,7 @@ language:
 
 knowledge:
     rag_feature_config_id: "ARFPC_1JDHu000000GoJNOA0"
-    citations_enabled: False
+    citations_enabled: True
     citations_url: ""
 
 variables:
@@ -66,6 +67,12 @@ variables:
     # Escalation latch
     escalation_initiated: mutable boolean = False
 
+    # Consent guardrail
+    subject_description_detected: mutable boolean = False
+        description: "True when the current user message contained verbatim Subject: and Description: labels; cleared after consent decision"
+    subject_description_consent_given: mutable boolean = False
+        description: "True when user has explicitly consented to use Subject:/Description: content in this session"
+
 
 connection messaging:
     escalation_message: "Connecting you with a Workday support specialist now. They will have full context of our conversation and your case details."
@@ -87,13 +94,29 @@ start_agent topic_router:
             if @variables.ContactId is not None:
                 set @variables.identity_verified = True
 
-            if @variables.admin_name != "":
+            # GUARDRAIL block A: resolve pending consent (deterministic guard, runs turn N+1)
+            if @variables.subject_description_detected == True:
+                | The user's previous message contained "Subject:" and "Description:" labels and you asked for consent.
+                | Evaluate their current response:
+                | - If affirmative (yes, sure, please, go ahead, etc.): call the grant_consent action, then proceed with normal routing using the Subject/Description content as the issue description.
+                | - If non-affirmative or denial: call the deny_consent action, then say exactly: "Okay. Please type your question and I'll look for some potential solutions." Do not use the Subject or Description content.
+
+            # GUARDRAIL block B: detect pattern in new message (LLM instruction, runs when no pending consent)
+            if @variables.subject_description_detected == False and @variables.subject_description_consent_given == False:
+                | Examine the user's current message before any other action.
+                | If it explicitly contains BOTH the verbatim labels "Subject:" AND "Description:" as field headers:
+                |   Call the detect_consent action, then ask exactly: "Would you like me to use the case details you've entered to look for potential solutions?" and end your turn immediately. Do not present the menu or route.
+                | If the message does NOT contain both labels verbatim, continue normally.
+
+            # Normal welcome/menu — suppressed while consent is pending
+            if @variables.admin_name != "" and @variables.subject_description_detected == False:
                 | Welcome back, {!@variables.admin_name}!
-            | I can assist you with:
-            | - Troubleshoot: Diagnose and resolve issues with your Workday instance
-            | - Configure: Step-by-step guidance for system setup and configuration
-            |
-            | What do you need help with today?
+            if @variables.subject_description_detected == False:
+                | I can assist you with:
+                | - Troubleshoot: Diagnose and resolve issues with your Workday instance
+                | - Configure: Step-by-step guidance for system setup and configuration
+                |
+                | What do you need help with today?                    
 
         actions:
             go_troubleshooting: @utils.transition to @topic.troubleshooting
@@ -104,6 +127,20 @@ start_agent topic_router:
 
             go_escalation: @utils.transition to @topic.pre_escalation
                 description: "I need to speak with a support specialist"
+
+            detect_consent: @utils.setVariables
+                with subject_description_detected = ...
+                description: "Set subject_description_detected=True when Subject:/Description: labels are found in the user message; value must be True"
+
+            grant_consent: @utils.setVariables
+                with subject_description_consent_given = ...
+                with subject_description_detected = ...
+                description: "User affirmed consent; set subject_description_consent_given=True and subject_description_detected=False"
+
+            deny_consent: @utils.setVariables
+                with subject_description_detected = ...
+                description: "User denied consent; set subject_description_detected=False to clear the pending state"                    
+
 
     actions:
         load_admin_context:
@@ -121,39 +158,57 @@ topic troubleshooting:
     description: "Diagnose and resolve Workday issues using the knowledge base; create cases when unresolvable"
     reasoning:
         instructions: ->
-            # Knowledge-first grounding for identity-verified users
-            if @variables.identity_verified and @variables.knowledge_first_enabled:
-                run @actions.stream_knowledge_search
+            # GUARDRAIL block A: resolve pending consent
+            if @variables.subject_description_detected == True:
+                | The user's previous message contained "Subject:" and "Description:" labels and you asked for consent.
+                | Evaluate their current response:
+                | - If affirmative: call the grant_consent action, then proceed using the Subject/Description content as the issue description. Continue the troubleshooting flow.
+                | - If non-affirmative or denial: call the deny_consent action, then say exactly: "Okay. Please type your question and I'll look for some potential solutions." Do not use the Subject or Description content.
+
+            # GUARDRAIL block B: detect pattern in new message
+            if @variables.subject_description_detected == False and @variables.subject_description_consent_given == False:
+                | Examine the user's current message before any other action.
+                | If it explicitly contains BOTH the verbatim labels "Subject:" AND "Description:" as field headers:
+                |   Call the detect_consent action, then ask exactly: "Would you like me to use the case details you've entered to look for potential solutions?" and end your turn immediately. Do not search the knowledge base or invoke any action.
+                | If the message does NOT contain both labels verbatim, continue normally.
+                | Never use Subject or Description content without explicit consent in this session.
+
+            # Knowledge-first grounding for identity-verified users — only runs when no consent is pending
+            if @variables.identity_verified and @variables.knowledge_first_enabled and @variables.subject_description_detected == False:
+                # run @actions.stream_knowledge_search
                     # with citationsEnabled = @knowledge.citations_enabled
                     # with citationsUrl = @knowledge.citations_url
-                    with query = "..."
+                    # with query = "..."
                     # with ragFeatureConfigId = @knowledge.rag_feature_config_id
                     # set @variables.last_rag_score = @outputs.knowledgeSummary # Placeholder score mapping if provided
                 | If the retrieved knowledge is sufficiently confident per {!@variables.knowledge_confidence_threshold} threshold, answer directly with the grounded summary. Include citations when enabled.
+                | When answering questions using the Knowledge Base or Data Library, you must include inline citations. At the end of your response, provide a 'Sources' section with the title and link for each document used.
                 | If confidence is below threshold or no relevant result, proceed with normal troubleshooting flow.
 
-            | Please describe the Workday issue you are experiencing. Include:
-            | - Which Workday module (HCM, Financials, Payroll, etc.)
-            | - What you were trying to do when the issue occurred
-            | - Any error messages you received
-            | - When the issue started
-            |
+            # | Please describe the Workday issue you are experiencing. Include:
+            # | - Which Workday module (HCM, Financials, Payroll, etc.)
+            # | - What you were trying to do when the issue occurred
+            # | - Any error messages you received
+            # | - When the issue started
+            # |
             | I will search our knowledge base for solutions. If the issue cannot be resolved,
             | I will create a support case and connect you with a specialist.
 
         actions:
-            tool_stream_knowledge_search: @actions.stream_knowledge_search
-                with citationsEnabled = @knowledge.citations_enabled
-                with citationsUrl = @knowledge.citations_url
+            tool_stream_knowledge_search: @actions.AnswerQuestionsWithKnowledge
                 with query = ...
-                with ragFeatureConfigId = @knowledge.rag_feature_config_id
-                # available when @variables.identity_verified and @variables.knowledge_first_enabled
-                # # Log decision after call
-                # run @actions.log_knowledge_decision
-                #     with query = "..."
-                #     with top_document_title = @outputs.knowledgeSummary
-                #     with score = 0
-                #     with used_answer = False
+            # tool_stream_knowledge_search: @actions.stream_knowledge_search
+            #     with citationsEnabled = @knowledge.citations_enabled
+            #     with citationsUrl = @knowledge.citations_url
+            #     with query = ...
+            #     with ragFeatureConfigId = @knowledge.rag_feature_config_id
+            #     # available when @variables.identity_verified and @variables.knowledge_first_enabled
+            #     # # Log decision after call
+            #     # run @actions.log_knowledge_decision
+            #     #     with query = "..."
+            #     #     with top_document_title = @outputs.knowledgeSummary
+            #     #     with score = 0
+            #     #     with used_answer = False
 
             search_kb: @actions.search_knowledge_base
                 description: "Search the knowledge base for a solution to this issue"
@@ -186,10 +241,22 @@ topic troubleshooting:
             back_to_menu: @utils.transition to @topic.topic_router
                 description: "Return to the main menu"
 
+            detect_consent: @utils.setVariables
+                with subject_description_detected = ...
+                description: "Set subject_description_detected=True when Subject:/Description: labels are found; value must be True"
+
+            grant_consent: @utils.setVariables
+                with subject_description_consent_given = ...
+                with subject_description_detected = ...
+                description: "User affirmed consent; set subject_description_consent_given=True and subject_description_detected=False"
+
+            deny_consent: @utils.setVariables
+                with subject_description_detected = ...
+                description: "User denied consent; set subject_description_detected=False"
+
     actions:
-        stream_knowledge_search:
-            description: |
-                Answers questions about company policies and procedures, troubleshooting steps, or product information. For example: “What is your return policy?” “How do I fix an issue?” or “What features does a product have?”
+        AnswerQuestionsWithKnowledge:
+            description: "Answers questions about company policies and procedures, troubleshooting steps, or product information. For example: 'What is your return policy?' 'How do I fix an issue?' or 'What features does a product have?'"
             label: "Answer Questions with Knowledge"
             require_user_confirmation: False
             include_in_progress_indicator: True
@@ -199,45 +266,94 @@ topic troubleshooting:
 
             inputs:
                 "query": string
-                    description: |
-                      Required. A string created by generative AI to be used in the knowledge article search.
+                    description: "Required. A string created by generative AI to be used in the knowledge article search."
                     label: "Query"
                     is_required: True
                     is_user_input: True
-                "citationsUrl": string
-                    description: |
-                      The URL to use for citations for custom Agents.
+                    complex_data_type_name: "lightning__textType"
+                "citationsUrl": string=@knowledge.citations_url
+                    description: "The URL to use for citations for custom Agents."
                     label: "Citations Url"
                     is_required: False
                     is_user_input: True
-                "ragFeatureConfigId": string
-                    description: |
-                      The RAG Feature ID to use for grounding this copilot action invocation.
+                    complex_data_type_name: "lightning__textType"
+                "ragFeatureConfigId": string=@knowledge.rag_feature_config_id
+                    description: "The RAG Feature ID to use for grounding this copilot action invocation."
                     label: "RAG Feature Configuration Id"
                     is_required: False
                     is_user_input: True
-                "citationsEnabled": boolean
-                    description: |
-                      Whether or not citations are enabled.
+                    complex_data_type_name: "lightning__textType"
+                "citationsEnabled": boolean=@knowledge.citations_enabled
+                    description: "Whether or not citations are enabled."
                     label: "Citations Enabled"
                     is_required: False
                     is_user_input: True
+                    complex_data_type_name: "lightning__booleanType"
 
             outputs:
                 "knowledgeSummary": object
-                    description: |
-                      A string formatted as rich text that includes a summary of the information retrieved from the knowledge articles and citations to those articles.
+                    description: "A string formatted as rich text that includes a summary of the information retrieved from the knowledge articles and citations to those articles."
                     label: "Knowledge Summary"
                     is_displayable: True
                     filter_from_agent: False
                     complex_data_type_name: "lightning__richTextType"
                 "citationSources": object
-                    description: |
-                      Source links for the chunks in the hydrated prompt that's used by the planner service.
+                    description: "Source links for the chunks in the hydrated prompt that's used by the planner service."
                     label: "Citation Sources"
                     is_displayable: False
                     filter_from_agent: False
                     complex_data_type_name: "@apexClassType/AiCopilot__GenAiCitationInput"
+        # stream_knowledge_search:
+        #     description: |
+        #         Answers questions about company policies and procedures, troubleshooting steps, or product information. For example: “What is your return policy?” “How do I fix an issue?” or “What features does a product have?”
+        #     label: "Answer Questions with Knowledge"
+        #     require_user_confirmation: False
+        #     include_in_progress_indicator: True
+        #     progress_indicator_message: "Getting answers"
+        #     source: "EmployeeCopilot__AnswerQuestionsWithKnowledge"
+        #     target: "standardInvocableAction://streamKnowledgeSearch"
+
+        #     inputs:
+        #         "query": string
+        #             description: |
+        #               Required. A string created by generative AI to be used in the knowledge article search.
+        #             label: "Query"
+        #             is_required: True
+        #             is_user_input: True
+        #         "citationsUrl": string
+        #             description: |
+        #               The URL to use for citations for custom Agents.
+        #             label: "Citations Url"
+        #             is_required: False
+        #             is_user_input: True
+        #         "ragFeatureConfigId": string
+        #             description: |
+        #               The RAG Feature ID to use for grounding this copilot action invocation.
+        #             label: "RAG Feature Configuration Id"
+        #             is_required: False
+        #             is_user_input: True
+        #         "citationsEnabled": boolean
+        #             description: |
+        #               Whether or not citations are enabled.
+        #             label: "Citations Enabled"
+        #             is_required: False
+        #             is_user_input: True
+
+        #     outputs:
+        #         "knowledgeSummary": object
+        #             description: |
+        #               A string formatted as rich text that includes a summary of the information retrieved from the knowledge articles and citations to those articles.
+        #             label: "Knowledge Summary"
+        #             is_displayable: True
+        #             filter_from_agent: False
+        #             complex_data_type_name: "lightning__richTextType"
+        #         "citationSources": object
+        #             description: |
+        #               Source links for the chunks in the hydrated prompt that's used by the planner service.
+        #             label: "Citation Sources"
+        #             is_displayable: False
+        #             filter_from_agent: False
+        #             complex_data_type_name: "@apexClassType/AiCopilot__GenAiCitationInput"
 
         # log_knowledge_decision:
         #     description: "Log knowledge decision with library id and retrieval score"
@@ -288,7 +404,7 @@ topic troubleshooting:
                 predicted_priority: string
                 predicted_product_area: string
                 success: boolean
-            target: "flow://Create_Workday_Support_Case"
+            target: "flow://Create_Workday_Support_Case"      
 
 topic configuration_assistance:
     description: "Step-by-step configuration guidance for Workday modules with settings validation"

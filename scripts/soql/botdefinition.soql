@@ -1,0 +1,2 @@
+SELECT Col1__c, Col2__c, Col3__c, Col4__c, Col5__c, ContentType__c, DataSourceObject__c, DataSource__c, ETag__c, FilePath__c, Id, InternalOrganization__c, KQ_FilePath__c, LastModified__c, Metadata__c, ParentId__c, ResolvedFilePath__c, Size__c, cdp_sys_SourceVersion__c
+  FROM ADL_Workday_Communi__dlm

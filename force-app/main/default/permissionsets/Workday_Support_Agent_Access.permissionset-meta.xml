@@ -75,15 +75,14 @@
         <field>Case.Product_Area__c</field>
         <readable>true</readable>
     </fieldPermissions>
-    <!-- AI_Transcript__c and AI_Summary__c: written via Flow (system context).
-         Agent user has read access only. Enable Shield Platform Encryption in production. -->
+    <!-- AI_Transcript__c and AI_Summary__c: written by the agent via Flow. Enable Shield Platform Encryption in production. -->
     <fieldPermissions>
-        <editable>false</editable>
+        <editable>true</editable>
         <field>Case.AI_Transcript__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <editable>false</editable>
+        <editable>true</editable>
         <field>Case.AI_Summary__c</field>
         <readable>true</readable>
     </fieldPermissions>

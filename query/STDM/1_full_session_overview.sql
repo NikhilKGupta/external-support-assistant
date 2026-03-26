@@ -17,4 +17,4 @@ SELECT "KQ_Id__c",
 	   "ssot__StartTimestamp__c",
 	   "ssot__VariableText__c" 
 FROM "ssot__AiAgentSession__dlm" 
-WHERE "ssot__Id__c" = '019d1161-b33c-78db-a9cb-20f180c9fcc2'
+WHERE "ssot__Id__c" = 'ffbf2564-06ba-48dc-88bc-5c89f2832067'

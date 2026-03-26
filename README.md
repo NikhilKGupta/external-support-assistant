@@ -36,3 +36,7 @@ flowchart LR
 | 6 | `6_full_trace_one_shot.sql` | Single query: messages + steps joined |
 
 Replace hard-coded **session IDs** (and verify DLO / field API names) for your org and bundle.
+
+**Salesforce CLI**: use org alias `dhurandhar` (`sf config set target-org dhurandhar` or `-o dhurandhar` on commands).
+
+**Agent tests:** [`agent-tests/`](agent-tests/) — YAML spec for Agent Testing Center (`sf agent test create` / `run`) plus preflight notes.

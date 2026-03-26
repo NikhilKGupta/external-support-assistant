@@ -23,5 +23,5 @@ SELECT "KQ_AiAgentInteractionId__c",
 	   "ssot__StartTimestamp__c",
 	   "ssot__TelemetryTraceSpanId__c" 
 FROM "ssot__AiAgentInteractionStep__dlm" 
-WHERE "ssot__AiAgentInteractionId__c" = '470475f9-842d-ba24-95a0-27d98f8c264c'
+WHERE "ssot__AiAgentInteractionId__c" = '3b8de8cc-33ef-4332-8ba5-1fb233f45bdf'
 ORDER BY "ssot__StartTimestamp__c"
