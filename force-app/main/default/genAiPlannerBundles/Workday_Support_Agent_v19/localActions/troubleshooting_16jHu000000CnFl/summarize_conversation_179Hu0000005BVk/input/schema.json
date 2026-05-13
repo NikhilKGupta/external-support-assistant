@@ -1,0 +1,28 @@
+{
+  "required" : [ ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "Input:Transcript" : {
+      "title" : "Input:Transcript",
+      "description" : "Conversation transcript from the current session",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "Input:Issue_Type" : {
+      "title" : "Input:Issue Type",
+      "description" : "Issue type category",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "Input:Workday_Module" : {
+      "title" : "Input:Workday Module",
+      "description" : "Workday module affected",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

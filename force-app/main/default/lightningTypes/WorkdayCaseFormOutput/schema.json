@@ -1,0 +1,28 @@
+{
+    "type": "object",
+    "title": "Workday Case Form Output",
+    "description": "Case creation confirmation result",
+    "lightning:type": "lightning__objectType",
+    "properties": {
+      "case_number": {
+        "lightning:type": "lightning__textType",
+        "title": "Case Number",
+        "description": "Created case number"
+      },
+      "case_id": {
+        "lightning:type": "lightning__textType",
+        "title": "Case ID",
+        "description": "Salesforce record ID of the created case"
+      },
+      "predicted_priority": {
+        "lightning:type": "lightning__textType",
+        "title": "Priority",
+        "description": "Case priority used for creation"
+      },
+      "predicted_product_area": {
+        "lightning:type": "lightning__textType",
+        "title": "Product Area",
+        "description": "Product area used for routing"
+      }
+    }
+}

@@ -372,7 +372,7 @@ topic troubleshooting:
                     label: "ai_summary"
                     is_required: True
                     is_user_input: False
-                    complex_data_type_name: "c__WorkdayCaseFormInput"
+                    # complex_data_type_name: "c__WorkdayCaseFormInput"
                 "ai_transcript": string
                     description: |
                       Full conversation transcript from the agent session for zero-context handoff
@@ -391,35 +391,35 @@ topic troubleshooting:
                     label: "issue_summary"
                     is_required: True
                     is_user_input: False
-                    complex_data_type_name: "c__WorkdayCaseFormInput"
+                    # complex_data_type_name: "c__WorkdayCaseFormInput"
                 "issue_type": string
                     description: |
                       Issue type category (troubleshooting or configuration)
                     label: "issue_type"
                     is_required: True
                     is_user_input: False
-                    complex_data_type_name: "c__WorkdayCaseFormInput"
+                    # complex_data_type_name: "c__WorkdayCaseFormInput"
                 "user_priority": string
                     description: |
                       User-confirmed priority from the case form (overrides prediction when provided)
                     label: "user_priority"
                     is_required: False
                     is_user_input: False
-                    complex_data_type_name: "c__WorkdayCaseFormInput"
+                    # complex_data_type_name: "c__WorkdayCaseFormInput"
                 "user_product_area": string
                     description: |
                       User-confirmed product area from the case form (overrides prediction when provided)
                     label: "user_product_area"
                     is_required: False
                     is_user_input: False
-                    complex_data_type_name: "c__WorkdayCaseFormInput"
+                    # complex_data_type_name: "c__WorkdayCaseFormInput"
                 "workday_module": string
                     description: |
                       Workday module affected (HCM, Financials, Payroll, etc.)
                     label: "workday_module"
                     is_required: True
                     is_user_input: False
-                    complex_data_type_name: "c__WorkdayCaseFormInput"
+                    # complex_data_type_name: "c__WorkdayCaseFormInput"
                 
             outputs:
                 "case_id": string
@@ -428,28 +428,28 @@ topic troubleshooting:
                     label: "case_id"
                     is_displayable: False
                     filter_from_agent: False
-                    complex_data_type_name: "c__WorkdayCaseFormOutput"
+                    # complex_data_type_name: "c__WorkdayCaseFormOutput"
                 "case_number": string
                     description: |
                       Case number of the created Salesforce case
                     label: "case_number"
                     is_displayable: False
                     filter_from_agent: False
-                    complex_data_type_name: "c__WorkdayCaseFormOutput"
+                    # complex_data_type_name: "c__WorkdayCaseFormOutput"
                 "predicted_priority": string
                     description: |
                       Auto-predicted case priority from CaseFieldPredictor
                     label: "predicted_priority"
                     is_displayable: False
                     filter_from_agent: False
-                    complex_data_type_name: "c__WorkdayCaseFormOutput"
+                    # complex_data_type_name: "c__WorkdayCaseFormOutput"
                 "predicted_product_area": string
                     description: |
                       Auto-predicted product area from CaseFieldPredictor for routing
                     label: "predicted_product_area"
                     is_displayable: False
                     filter_from_agent: False
-                    complex_data_type_name: "c__WorkdayCaseFormOutput"
+                    # complex_data_type_name: "c__WorkdayCaseFormOutput"
                 "success": boolean
                     description: |
                       True if case was created successfully
@@ -457,207 +457,207 @@ topic troubleshooting:
                     is_displayable: False
                     filter_from_agent: False
 
-topic configuration_assistance:
-    description: "Step-by-step configuration guidance for Workday modules with settings validation"
-    reasoning:
-        instructions: ->
-            # Knowledge-first grounding for identity-verified users
-            if @variables.identity_verified and @variables.knowledge_first_enabled:
-                run @actions.stream_knowledge_search
-                    # with citationsEnabled = @knowledge.citations_enabled
-                    # with citationsUrl = @knowledge.citations_url
-                    with query = "..."
-                    # with ragFeatureConfigId = @knowledge.rag_feature_config_id
-                    # set @variables.last_rag_score = @outputs.knowledgeSummary # Placeholder score mapping if provided
-                | If the retrieved knowledge is sufficiently confident per {!@variables.knowledge_confidence_threshold} threshold, answer directly with the grounded summary. Include citations when enabled.
-                | Base your response solely on what the knowledge search returns. Do not supplement with information outside the retrieved articles.
-                | If confidence is below threshold or no relevant result, proceed with normal configuration flow.
+# topic configuration_assistance:
+#     description: "Step-by-step configuration guidance for Workday modules with settings validation"
+#     reasoning:
+#         instructions: ->
+#             # Knowledge-first grounding for identity-verified users
+#             if @variables.identity_verified and @variables.knowledge_first_enabled:
+#                 run @actions.stream_knowledge_search
+#                     # with citationsEnabled = @knowledge.citations_enabled
+#                     # with citationsUrl = @knowledge.citations_url
+#                     with query = "..."
+#                     # with ragFeatureConfigId = @knowledge.rag_feature_config_id
+#                     # set @variables.last_rag_score = @outputs.knowledgeSummary # Placeholder score mapping if provided
+#                 | If the retrieved knowledge is sufficiently confident per {!@variables.knowledge_confidence_threshold} threshold, answer directly with the grounded summary. Include citations when enabled.
+#                 | Base your response solely on what the knowledge search returns. Do not supplement with information outside the retrieved articles.
+#                 | If confidence is below threshold or no relevant result, proceed with normal configuration flow.
 
-            | I will guide you through configuring your Workday instance.
-            |
-            | What would you like to configure? Common areas include:
-            | - Security groups and role assignments
-            | - Business processes and approval workflows
-            | - Reports and dashboards
-            | - API integrations and connectors
-            |
-            | Please describe what you need to set up.
+#             | I will guide you through configuring your Workday instance.
+#             |
+#             | What would you like to configure? Common areas include:
+#             | - Security groups and role assignments
+#             | - Business processes and approval workflows
+#             | - Reports and dashboards
+#             | - API integrations and connectors
+#             |
+#             | Please describe what you need to set up.
 
-            if @variables.issue_type != "":
-                | Let me retrieve the configuration guide for {!@variables.issue_type}...
+#             if @variables.issue_type != "":
+#                 | Let me retrieve the configuration guide for {!@variables.issue_type}...
 
-        actions:
-            tool_stream_knowledge_search: @actions.stream_knowledge_search
-                with citationsEnabled = @knowledge.citations_enabled
-                with citationsUrl = @knowledge.citations_url
-                with query = ...
-                with ragFeatureConfigId = @knowledge.rag_feature_config_id
-                # available when @variables.identity_verified and @variables.knowledge_first_enabled
-                # run @actions.log_knowledge_decision
-                #     with query = "..."
-                #     with top_document_title = @outputs.knowledgeSummary
-                #     with score = 0
-                #     with used_answer = False
+#         actions:
+#             tool_stream_knowledge_search: @actions.stream_knowledge_search
+#                 with citationsEnabled = @knowledge.citations_enabled
+#                 with citationsUrl = @knowledge.citations_url
+#                 with query = ...
+#                 with ragFeatureConfigId = @knowledge.rag_feature_config_id
+#                 # available when @variables.identity_verified and @variables.knowledge_first_enabled
+#                 # run @actions.log_knowledge_decision
+#                 #     with query = "..."
+#                 #     with top_document_title = @outputs.knowledgeSummary
+#                 #     with score = 0
+#                 #     with used_answer = False
 
-            get_guide: @actions.get_config_guide
-                description: "Get step-by-step configuration guidance"
-                available when @variables.issue_type != ""
+#             get_guide: @actions.get_config_guide
+#                 description: "Get step-by-step configuration guidance"
+#                 available when @variables.issue_type != ""
 
-            validate: @actions.validate_config
-                with configType = @variables.issue_type
-                with workdayModule = @variables.workday_module
-                description: "Validate my configuration settings against best practices"
-                available when @variables.issue_type != ""
+#             validate: @actions.validate_config
+#                 with configType = @variables.issue_type
+#                 with workdayModule = @variables.workday_module
+#                 description: "Validate my configuration settings against best practices"
+#                 available when @variables.issue_type != ""
 
-            go_to_troubleshooting: @utils.transition to @topic.troubleshooting
-                description: "I am encountering errors during the configuration"
+#             go_to_troubleshooting: @utils.transition to @topic.troubleshooting
+#                 description: "I am encountering errors during the configuration"
 
-            back_to_menu: @utils.transition to @topic.topic_router
-                description: "Return to the main menu"
+#             back_to_menu: @utils.transition to @topic.topic_router
+#                 description: "Return to the main menu"
 
-    actions:
-        stream_knowledge_search:
-            description: |
-                Answers questions about company policies and procedures, troubleshooting steps, or product information. For example: “What is your return policy?” “How do I fix an issue?” or “What features does a product have?”
-            label: "Answer Questions with Knowledge"
-            require_user_confirmation: False
-            include_in_progress_indicator: True
-            progress_indicator_message: "Getting answers"
-            source: "EmployeeCopilot__AnswerQuestionsWithKnowledge"
-            target: "standardInvocableAction://streamKnowledgeSearch"
+#     actions:
+#         stream_knowledge_search:
+#             description: |
+#                 Answers questions about company policies and procedures, troubleshooting steps, or product information. For example: “What is your return policy?” “How do I fix an issue?” or “What features does a product have?”
+#             label: "Answer Questions with Knowledge"
+#             require_user_confirmation: False
+#             include_in_progress_indicator: True
+#             progress_indicator_message: "Getting answers"
+#             source: "EmployeeCopilot__AnswerQuestionsWithKnowledge"
+#             target: "standardInvocableAction://streamKnowledgeSearch"
 
-            inputs:
-                "query": string
-                    description: |
-                      Required. A string created by generative AI to be used in the knowledge article search.
-                    label: "Query"
-                    is_required: True
-                    is_user_input: True
-                "citationsUrl": string
-                    description: |
-                      The URL to use for citations for custom Agents.
-                    label: "Citations Url"
-                    is_required: False
-                    is_user_input: True
-                "ragFeatureConfigId": string
-                    description: |
-                      The RAG Feature ID to use for grounding this copilot action invocation.
-                    label: "RAG Feature Configuration Id"
-                    is_required: False
-                    is_user_input: True
-                "citationsEnabled": boolean
-                    description: |
-                      Whether or not citations are enabled.
-                    label: "Citations Enabled"
-                    is_required: False
-                    is_user_input: True
+#             inputs:
+#                 "query": string
+#                     description: |
+#                       Required. A string created by generative AI to be used in the knowledge article search.
+#                     label: "Query"
+#                     is_required: True
+#                     is_user_input: True
+#                 "citationsUrl": string
+#                     description: |
+#                       The URL to use for citations for custom Agents.
+#                     label: "Citations Url"
+#                     is_required: False
+#                     is_user_input: True
+#                 "ragFeatureConfigId": string
+#                     description: |
+#                       The RAG Feature ID to use for grounding this copilot action invocation.
+#                     label: "RAG Feature Configuration Id"
+#                     is_required: False
+#                     is_user_input: True
+#                 "citationsEnabled": boolean
+#                     description: |
+#                       Whether or not citations are enabled.
+#                     label: "Citations Enabled"
+#                     is_required: False
+#                     is_user_input: True
 
-            outputs:
-                "knowledgeSummary": object
-                    description: |
-                      A string formatted as rich text that includes a summary of the information retrieved from the knowledge articles and citations to those articles.
-                    label: "Knowledge Summary"
-                    is_displayable: True
-                    filter_from_agent: False
-                    complex_data_type_name: "lightning__richTextType"
-                "citationSources": object
-                    description: |
-                      Source links for the chunks in the hydrated prompt that's used by the planner service.
-                    label: "Citation Sources"
-                    is_displayable: False
-                    filter_from_agent: False
-                    complex_data_type_name: "@apexClassType/AiCopilot__GenAiCitationInput"
+#             outputs:
+#                 "knowledgeSummary": object
+#                     description: |
+#                       A string formatted as rich text that includes a summary of the information retrieved from the knowledge articles and citations to those articles.
+#                     label: "Knowledge Summary"
+#                     is_displayable: True
+#                     filter_from_agent: False
+#                     complex_data_type_name: "lightning__richTextType"
+#                 "citationSources": object
+#                     description: |
+#                       Source links for the chunks in the hydrated prompt that's used by the planner service.
+#                     label: "Citation Sources"
+#                     is_displayable: False
+#                     filter_from_agent: False
+#                     complex_data_type_name: "@apexClassType/AiCopilot__GenAiCitationInput"
 
-        get_config_guide:
-            description: "Retrieve step-by-step configuration guidance for the requested Workday feature"
-            target: "generatePromptResponse://Workday_Config_Guide"
+#         get_config_guide:
+#             description: "Retrieve step-by-step configuration guidance for the requested Workday feature"
+#             target: "generatePromptResponse://Workday_Config_Guide"
 
-        validate_config:
-            description: "Validate configuration settings against Workday best practices before applying"
-            inputs:
-                configType: string
-                workdayModule: string
-            outputs:
-                isValid: boolean
-                validationErrors: string
-                recommendations: string
-            target: "apex://WorkdayConfigValidator"
+#         validate_config:
+#             description: "Validate configuration settings against Workday best practices before applying"
+#             inputs:
+#                 configType: string
+#                 workdayModule: string
+#             outputs:
+#                 isValid: boolean
+#                 validationErrors: string
+#                 recommendations: string
+#             target: "apex://WorkdayConfigValidator"
 
-topic pre_escalation:
-    description: "Summarise the conversation and create a case before transferring to a human agent"
-    reasoning:
-        instructions: ->
-            | I am preparing a handoff summary and support case for the specialist.
+# topic pre_escalation:
+#     description: "Summarise the conversation and create a case before transferring to a human agent"
+#     reasoning:
+#         instructions: ->
+#             | I am preparing a handoff summary and support case for the specialist.
 
-            if @variables.case_created == False:
-                run @actions.summarize_conversation
-                    with "Input:Transcript" = @variables.issue_summary
-                    with "Input:Issue_Type" = @variables.issue_type
-                    with "Input:Workday_Module" = @variables.workday_module
-                    set @variables.ai_summary = @outputs.promptResponse
-                    set @variables.ai_transcript = @outputs.promptResponse
+#             if @variables.case_created == False:
+#                 run @actions.summarize_conversation
+#                     with "Input:Transcript" = @variables.issue_summary
+#                     with "Input:Issue_Type" = @variables.issue_type
+#                     with "Input:Workday_Module" = @variables.workday_module
+#                     set @variables.ai_summary = @outputs.promptResponse
+#                     set @variables.ai_transcript = @outputs.promptResponse
 
-                run @actions.create_case_for_escalation
-                    with contact_id = @variables.ContactId
-                    with account_id = @variables.admin_account_id
-                    with issue_summary = @variables.issue_summary
-                    with issue_type = @variables.issue_type
-                    with workday_module = @variables.workday_module
-                    with ai_summary = @variables.ai_summary
-                    with ai_transcript = @variables.ai_transcript
-                    set @variables.case_number = @outputs.case_number
-                    set @variables.predicted_priority = @outputs.predicted_priority
-                    set @variables.predicted_product_area = @outputs.predicted_product_area
-                    set @variables.case_created = True
+#                 run @actions.create_case_for_escalation
+#                     with contact_id = @variables.ContactId
+#                     with account_id = @variables.admin_account_id
+#                     with issue_summary = @variables.issue_summary
+#                     with issue_type = @variables.issue_type
+#                     with workday_module = @variables.workday_module
+#                     with ai_summary = @variables.ai_summary
+#                     with ai_transcript = @variables.ai_transcript
+#                     set @variables.case_number = @outputs.case_number
+#                     set @variables.predicted_priority = @outputs.predicted_priority
+#                     set @variables.predicted_product_area = @outputs.predicted_product_area
+#                     set @variables.case_created = True
 
-            | I have prepared a support case for the specialist.
-            |
-            | Case Created: {!@variables.case_number}
-            | Priority: {!@variables.predicted_priority} | Area: {!@variables.predicted_product_area}
-            |
-            | The specialist will have complete context of everything we discussed.
-            | You will not need to repeat yourself.
-            |
-            | Connecting you now...
+#             | I have prepared a support case for the specialist.
+#             |
+#             | Case Created: {!@variables.case_number}
+#             | Priority: {!@variables.predicted_priority} | Area: {!@variables.predicted_product_area}
+#             |
+#             | The specialist will have complete context of everything we discussed.
+#             | You will not need to repeat yourself.
+#             |
+#             | Connecting you now...
 
-        actions:
-            summarize: @actions.summarize_conversation
-                description: "Generate conversation summary for the specialist"
+#         actions:
+#             summarize: @actions.summarize_conversation
+#                 description: "Generate conversation summary for the specialist"
 
-            go_to_escalation: @utils.transition to @topic.escalation
-                description: "Connect me with a specialist"
+#             go_to_escalation: @utils.transition to @topic.escalation
+#                 description: "Connect me with a specialist"
 
-    actions:
-        summarize_conversation:
-            description: "Generate a structured conversation summary for zero-context handoff to the human specialist"
-            inputs:
-                "Input:Transcript": string
-                    description: "Conversation transcript from the current session"
-                "Input:Issue_Type": string
-                    description: "Issue type category"
-                "Input:Workday_Module": string
-                    description: "Workday module affected"
-            outputs:
-                promptResponse: string
-                    description: "Structured transcript summary for case handoff"
-            target: "generatePromptResponse://Workday_Conversation_Summarizer"
+#     actions:
+#         summarize_conversation:
+#             description: "Generate a structured conversation summary for zero-context handoff to the human specialist"
+#             inputs:
+#                 "Input:Transcript": string
+#                     description: "Conversation transcript from the current session"
+#                 "Input:Issue_Type": string
+#                     description: "Issue type category"
+#                 "Input:Workday_Module": string
+#                     description: "Workday module affected"
+#             outputs:
+#                 promptResponse: string
+#                     description: "Structured transcript summary for case handoff"
+#             target: "generatePromptResponse://Workday_Conversation_Summarizer"
 
-        create_case_for_escalation:
-            description: "Create a support case with full transcript and predicted fields before escalation"
-            inputs:
-                contact_id: string
-                account_id: string
-                issue_summary: string
-                issue_type: string
-                workday_module: string
-                ai_transcript: string
-                ai_summary: string
-            outputs:
-                case_number: string
-                predicted_priority: string
-                predicted_product_area: string
-                success: boolean
-            target: "flow://Create_Workday_Support_Case"
+#         create_case_for_escalation:
+#             description: "Create a support case with full transcript and predicted fields before escalation"
+#             inputs:
+#                 contact_id: string
+#                 account_id: string
+#                 issue_summary: string
+#                 issue_type: string
+#                 workday_module: string
+#                 ai_transcript: string
+#                 ai_summary: string
+#             outputs:
+#                 case_number: string
+#                 predicted_priority: string
+#                 predicted_product_area: string
+#                 success: boolean
+#             target: "flow://Create_Workday_Support_Case"
 
 topic escalation:
     description: "Transfer the conversation to a human Workday support specialist via Omni-Channel"

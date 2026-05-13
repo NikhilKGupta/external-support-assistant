@@ -5,8 +5,8 @@
     <assignments>
         <name>SetSuccessFalse</name>
         <label>Set Success False</label>
-        <locationX>200</locationX>
-        <locationY>300</locationY>
+        <locationX>399</locationX>
+        <locationY>785</locationY>
         <assignmentItems>
             <assignToReference>success</assignToReference>
             <operator>Assign</operator>
@@ -26,7 +26,7 @@
         <name>SetSuccessTrue</name>
         <label>Set Success True</label>
         <locationX>50</locationX>
-        <locationY>300</locationY>
+        <locationY>765</locationY>
         <assignmentItems>
             <assignToReference>success</assignToReference>
             <operator>Assign</operator>
@@ -38,8 +38,8 @@
     <decisions>
         <name>CheckContactFound</name>
         <label>Contact Found?</label>
-        <locationX>50</locationX>
-        <locationY>200</locationY>
+        <locationX>221</locationX>
+        <locationY>555</locationY>
         <defaultConnector>
             <targetReference>SetSuccessFalse</targetReference>
         </defaultConnector>
@@ -61,6 +61,7 @@
         </rules>
     </decisions>
     <description>Loads Workday customer admin profile and account details from the authenticated community portal session. Called by the Workday Support Agent at session start.</description>
+    <environments>Default</environments>
     <interviewLabel>Load Workday Customer Context {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Load Workday Customer Context</label>
     <processMetadataValues>
@@ -69,35 +70,18 @@
             <stringValue>LightningFlowBuilder</stringValue>
         </value>
     </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>FREE_FORM_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
-    <recordLookups>
-        <name>GetContact</name>
-        <label>Get Contact Record</label>
-        <locationX>50</locationX>
-        <locationY>100</locationY>
-        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
-        <connector>
-            <targetReference>GetAccount</targetReference>
-        </connector>
-        <filterLogic>and</filterLogic>
-        <filters>
-            <field>Id</field>
-            <operator>EqualTo</operator>
-            <value>
-                <elementReference>contact_id</elementReference>
-            </value>
-        </filters>
-        <object>Contact</object>
-        <outputAssignments>
-            <assignToReference>admin_name</assignToReference>
-            <field>Name</field>
-        </outputAssignments>
-    </recordLookups>
     <recordLookups>
         <name>GetAccount</name>
         <label>Get Account Record</label>
-        <locationX>50</locationX>
-        <locationY>150</locationY>
+        <locationX>227</locationX>
+        <locationY>391</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>CheckContactFound</targetReference>
@@ -120,9 +104,32 @@
             <field>Type</field>
         </outputAssignments>
     </recordLookups>
+    <recordLookups>
+        <name>GetContact</name>
+        <label>Get Contact Record</label>
+        <locationX>226</locationX>
+        <locationY>214</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>GetAccount</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>contact_id</elementReference>
+            </value>
+        </filters>
+        <object>Contact</object>
+        <outputAssignments>
+            <assignToReference>admin_name</assignToReference>
+            <field>Name</field>
+        </outputAssignments>
+    </recordLookups>
     <start>
-        <locationX>50</locationX>
-        <locationY>0</locationY>
+        <locationX>99</locationX>
+        <locationY>50</locationY>
         <connector>
             <targetReference>GetContact</targetReference>
         </connector>

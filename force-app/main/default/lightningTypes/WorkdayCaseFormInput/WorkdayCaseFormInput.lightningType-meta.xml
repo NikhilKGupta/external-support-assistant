@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningTypeBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <description>Input Lightning Type for the Workday case creation form. Renders an editable form with pre-populated fields for user review before case submission.</description>
+    <masterLabel>Workday Case Form Input</masterLabel>
+</LightningTypeBundle>

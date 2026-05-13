@@ -1,0 +1,49 @@
+{
+    "type": "object",
+    "title": "Workday Case Form Input",
+    "description": "Case creation form for user review before submission",
+    "lightning:type": "lightning__objectType",
+    "properties": {
+      "admin_name": {
+        "lightning:type": "lightning__textType",
+        "title": "Admin Name",
+        "description": "Name of the customer admin (read-only display)"
+      },
+      "ai_summary": {
+        "lightning:type": "lightning__textType",
+        "title": "AI Summary",
+        "description": "AI-generated conversation summary (read-only display)"
+      },
+      "issue_summary": {
+        "lightning:type": "lightning__textType",
+        "title": "Subject",
+        "description": "Case subject / issue summary",
+        "minLength": 1
+      },
+      "issue_type": {
+        "lightning:type": "lightning__textType",
+        "title": "Type",
+        "description": "Issue type category",
+        "enum": ["Troubleshooting", "Configuration", "Other"]
+      },
+      "workday_module": {
+        "lightning:type": "lightning__textType",
+        "title": "Workday Module",
+        "description": "Affected Workday module",
+        "enum": ["HCM", "Financials", "Payroll", "Time Tracking", "Integration", "Analytics", "Security"]
+      },
+      "user_priority": {
+        "lightning:type": "lightning__textType",
+        "title": "Priority",
+        "description": "Case priority (AI-predicted, user can override)",
+        "enum": ["Critical", "High", "Medium"]
+      },
+      "user_product_area": {
+        "lightning:type": "lightning__textType",
+        "title": "Product Area",
+        "description": "Product area for routing (AI-predicted, user can override)",
+        "enum": ["Integration", "Security", "Reporting", "Configuration", "Performance", "Data Management", "User Management", "Other"]
+      }
+    },
+    "required": ["issue_summary"]
+  }

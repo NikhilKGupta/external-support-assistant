@@ -1,55 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
-
-    <!-- ── 1. Custom Fields (deploy before Flows and Apex that reference them) ── -->
     <types>
-        <members>Case.AI_Summary__c</members>
-        <members>Case.AI_Transcript__c</members>
-        <members>Case.Last_Risk_Assessment__c</members>
-        <members>Case.Next_Best_Action__c</members>
-        <members>Case.Product_Area__c</members>
-        <members>Case.Risk_Level__c</members>
-        <members>Case.Risk_Score__c</members>
-        <members>Case.Workday_Module__c</members>
-        <name>CustomField</name>
+        <members>Product_Support_Agent</members>
+        <name>AiAuthoringBundle</name>
     </types>
-
-    <!-- ── 2. Apex Classes (deploy before Flows that call them as Apex actions) ── -->
     <types>
-        <members>CaseFieldPredictor</members>
-        <members>CaseRiskScoringBatch</members>
-        <members>CaseRiskScoringBatchTest</members>
-        <members>WorkdayConfigValidator</members>
+        <members>ChannelDetector</members>
+        <members>ChatProductLookup</members>
+        <members>VoiceProductLookup</members>
         <name>ApexClass</name>
     </types>
-
-    <!-- ── 3. Flows ────────────────────────────────────────────────────────────── -->
-    <types>
-        <members>Create_Workday_Support_Case</members>
-        <members>Load_Workday_Customer_Context</members>
-        <members>Route_Workday_To_Queue</members>
-        <name>Flow</name>
-    </types>
-
-    <!-- ── 4. Prompt Templates ─────────────────────────────────────────────────── -->
-    <types>
-        <members>Workday_Config_Guide</members>
-        <members>Workday_Conversation_Summarizer</members>
-        <members>Workday_KB_Search</members>
-        <members>Workday_Risk_Next_Best_Action</members>
-        <name>GenAiPromptTemplate</name>
-    </types>
-
-    <!-- ── 5. Permission Sets ──────────────────────────────────────────────────── -->
-    <types>
-        <members>Workday_Risk_Monitor_Access</members>
-        <members>Workday_Support_Agent_Access</members>
-        <name>PermissionSet</name>
-    </types>
-
-    <!-- ── 6. Agent Script Bundle ─────────────────────────────────────────────── -->
-    <!-- AiAuthoringBundle is deployed separately via:                           -->
-    <!--   sf agent publish authoring-bundle --api-name Workday_Support_Agent    -->
-
     <version>66.0</version>
 </Package>
