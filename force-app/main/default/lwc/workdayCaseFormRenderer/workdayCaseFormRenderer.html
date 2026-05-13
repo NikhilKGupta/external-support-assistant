@@ -1,0 +1,58 @@
+<template>
+    <div class="slds-card slds-p-around_medium">
+        <div class="slds-media slds-m-bottom_small">
+            <div class="slds-media__figure">
+                <span class="slds-icon_container slds-icon-utility-success">
+                    <lightning-icon 
+                        icon-name="utility:success" 
+                        alternative-text="Success" 
+                        size="small"
+                        variant="success">
+                    </lightning-icon>
+                </span>
+            </div>
+            <div class="slds-media__body">
+                <h2 class="slds-text-heading_small">
+                    Case Created Successfully
+                </h2>
+            </div>
+        </div>
+
+        <!-- Case details grid -->
+        <dl class="slds-dl_horizontal">
+            <dt class="slds-dl_horizontal__label">
+                <p class="slds-truncate">Case Number</p>
+            </dt>
+            <dd class="slds-dl_horizontal__detail">
+                <p class="slds-truncate">
+                    <lightning-formatted-text value={case_number}></lightning-formatted-text>
+                </p>
+            </dd>
+
+            <dt class="slds-dl_horizontal__label">
+                <p class="slds-truncate">Priority</p>
+            </dt>
+            <dd class="slds-dl_horizontal__detail">
+                <lightning-badge label={predicted_priority} class={priorityBadgeClass}></lightning-badge>
+            </dd>
+
+            <dt class="slds-dl_horizontal__label">
+                <p class="slds-truncate">Product Area</p>
+            </dt>
+            <dd class="slds-dl_horizontal__detail">
+                <p class="slds-truncate">
+                    <lightning-formatted-text value={predicted_product_area}></lightning-formatted-text>
+                </p>
+            </dd>
+        </dl>
+
+        <!-- Link to case record (if case ID is provided) -->
+        <div if:true={caseId} class="slds-m-top_medium">
+            <lightning-button
+                label="View Case"
+                icon-name="utility:open"
+                onclick={handleViewCase}>
+            </lightning-button>
+        </div>
+    </div>
+</template>

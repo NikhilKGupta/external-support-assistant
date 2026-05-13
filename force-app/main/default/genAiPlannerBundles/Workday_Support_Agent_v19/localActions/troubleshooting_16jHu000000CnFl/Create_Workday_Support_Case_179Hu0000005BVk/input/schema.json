@@ -1,0 +1,77 @@
+{
+  "required" : [ "account_id", "ai_summary", "ai_transcript", "contact_id", "issue_summary", "issue_type", "workday_module" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "account_id" : {
+      "title" : "account_id",
+      "description" : "Account ID of the customer organisation",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "admin_name" : {
+      "title" : "admin_name",
+      "description" : "Name of the customer admin (display-only, not stored by flow)",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "ai_summary" : {
+      "title" : "ai_summary",
+      "description" : "Structured AI-generated summary of the conversation for human agent review",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "ai_transcript" : {
+      "title" : "ai_transcript",
+      "description" : "Full conversation transcript from the agent session for zero-context handoff",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "contact_id" : {
+      "title" : "contact_id",
+      "description" : "Contact ID of the authenticated customer admin",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "issue_summary" : {
+      "title" : "issue_summary",
+      "description" : "Summary of the customer issue captured during the agent session",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "issue_type" : {
+      "title" : "issue_type",
+      "description" : "Issue type category (troubleshooting or configuration)",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "user_priority" : {
+      "title" : "user_priority",
+      "description" : "User-confirmed priority from the case form (overrides prediction when provided)",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "user_product_area" : {
+      "title" : "user_product_area",
+      "description" : "User-confirmed product area from the case form (overrides prediction when provided)",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    },
+    "workday_module" : {
+      "title" : "workday_module",
+      "description" : "Workday module affected (HCM, Financials, Payroll, etc.)",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

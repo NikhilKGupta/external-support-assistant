@@ -1,0 +1,83 @@
+<template>
+    <div class="slds-card slds-p-around_medium">
+        <h2 class="slds-text-heading_small slds-m-bottom_medium">
+            Create Support Case
+        </h2>
+
+        <!-- Read-only: Admin Name -->
+        <div class="slds-form-element slds-m-bottom_small" if:true={admin_name}>
+            <span class="slds-form-element__label">Reported By</span>
+            <div class="slds-form-element__static">
+                <lightning-formatted-text value={admin_name}></lightning-formatted-text>
+            </div>
+        </div>
+
+        <!-- Read-only: AI Summary (collapsible) -->
+        <lightning-accordion if:true={ai_summary} class="slds-m-bottom_small"
+                            allow-multiple-sections-open>
+            <lightning-accordion-section label="AI Conversation Summary">
+                <lightning-formatted-text value={ai_summary}></lightning-formatted-text>
+            </lightning-accordion-section>
+        </lightning-accordion>
+
+        <!-- Editable: Subject -->
+        <lightning-input
+            label="Subject"
+            value={subject}
+            required
+            message-when-value-missing="Subject is required"
+            onchange={handleSubjectChange}
+            class="slds-m-bottom_small">
+        </lightning-input>
+
+        <!-- Editable: Issue Type -->
+        <lightning-combobox
+            label="Type"
+            value={issue_type}
+            options={issueTypeOptions}
+            onchange={handleIssueTypeChange}
+            class="slds-m-bottom_small">
+        </lightning-combobox>
+
+        <!-- Editable: Workday Module -->
+        <lightning-combobox
+            label="Workday Module"
+            value={workday_module}
+            options={workdayModuleOptions}
+            onchange={handleWorkdayModuleChange}
+            class="slds-m-bottom_small">
+        </lightning-combobox>
+
+        <!-- Editable: Priority -->
+        <lightning-combobox
+            label="Priority"
+            value={user_priority}
+            options={priorityOptions}
+            onchange={handlePriorityChange}
+            class="slds-m-bottom_small">
+        </lightning-combobox>
+
+        <!-- Editable: Product Area -->
+        <lightning-combobox
+            label="Product Area"
+            value={user_product_area}
+            options={productAreaOptions}
+            onchange={handleProductAreaChange}
+            class="slds-m-bottom_small">
+        </lightning-combobox>
+
+        <!-- Submit / Cancel -->
+        <div class="slds-m-top_medium slds-grid slds-grid_align-end">
+            <lightning-button
+                label="Cancel"
+                onclick={handleCancel}
+                class="slds-m-right_x-small">
+            </lightning-button>
+            <lightning-button
+                label="Create Case"
+                variant="brand"
+                onclick={handleSubmit}>
+            </lightning-button>
+        </div>
+    </div>
+</template>

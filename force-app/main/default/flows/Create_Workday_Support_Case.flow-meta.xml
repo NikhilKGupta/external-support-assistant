@@ -3,8 +3,8 @@
     <actionCalls>
         <name>PredictCaseFields</name>
         <label>Predict Case Fields</label>
-        <locationX>50</locationX>
-        <locationY>100</locationY>
+        <locationX>165</locationX>
+        <locationY>396</locationY>
         <actionName>CaseFieldPredictor</actionName>
         <actionType>apex</actionType>
         <connector>
@@ -39,6 +39,7 @@
             </value>
         </inputParameters>
         <nameSegment>CaseFieldPredictor</nameSegment>
+        <offset>0</offset>
         <outputParameters>
             <assignToReference>predicted_priority</assignToReference>
             <name>predictedPriority</name>
@@ -53,8 +54,8 @@
     <assignments>
         <name>SetCreateFailed</name>
         <label>Set Create Failed</label>
-        <locationX>250</locationX>
-        <locationY>200</locationY>
+        <locationX>738</locationX>
+        <locationY>659</locationY>
         <assignmentItems>
             <assignToReference>success</assignToReference>
             <operator>Assign</operator>
@@ -66,8 +67,8 @@
     <assignments>
         <name>SetPredictionDefaults</name>
         <label>Set Prediction Defaults on Fault</label>
-        <locationX>250</locationX>
-        <locationY>100</locationY>
+        <locationX>544</locationX>
+        <locationY>414</locationY>
         <assignmentItems>
             <assignToReference>predicted_priority</assignToReference>
             <operator>Assign</operator>
@@ -89,8 +90,8 @@
     <assignments>
         <name>SetSuccess</name>
         <label>Set Success</label>
-        <locationX>50</locationX>
-        <locationY>400</locationY>
+        <locationX>163</locationX>
+        <locationY>859</locationY>
         <assignmentItems>
             <assignToReference>success</assignToReference>
             <operator>Assign</operator>
@@ -99,7 +100,65 @@
             </value>
         </assignmentItems>
     </assignments>
-    <description>Creates a contextual Workday support case with auto-predicted Priority and Product Area (Phase 1: Seamless Case Transition). Attaches the full AI transcript and structured summary to ensure zero-context loss for human agents.</description>
+    <assignments>
+        <name>UseUserValues</name>
+        <label>Use User-Confirmed Values</label>
+        <locationX>744</locationX>
+        <locationY>309</locationY>
+        <assignmentItems>
+            <assignToReference>predicted_priority</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>user_priority</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>predicted_product_area</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>user_product_area</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>CreateCase</targetReference>
+        </connector>
+    </assignments>
+    <decisions>
+        <name>CheckUserValues</name>
+        <label>Check User-Confirmed Values</label>
+        <locationX>162</locationX>
+        <locationY>178</locationY>
+        <defaultConnector>
+            <targetReference>PredictCaseFields</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>No user values - predict</defaultConnectorLabel>
+        <rules>
+            <name>UserValuesProvided</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>user_priority</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>user_priority</leftValueReference>
+                <operator>NotEqualTo</operator>
+                <rightValue>
+                    <stringValue></stringValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>UseUserValues</targetReference>
+            </connector>
+            <label>User values provided</label>
+        </rules>
+    </decisions>
+    <description>Creates a contextual Workday support case with auto-predicted Priority and Product Area (Phase 1: Seamless Case Transition). Attaches the full AI transcript and structured summary to ensure zero-context loss for human agents.
+
+This flow is triggered automatically to predict and create a support case using AI-generated data. It first checks if user-confirmed values are provided. If not, it predicts the case priority and product area using the &apos;CaseFieldPredictor&apos; Apex action. Then, it creates a support case with the predicted or user-confirmed values. Finally, it retrieves the case number and sets a success flag.</description>
+    <environments>Default</environments>
     <interviewLabel>Create Workday Support Case {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Create Workday Support Case</label>
     <processMetadataValues>
@@ -108,12 +167,18 @@
             <stringValue>LightningFlowBuilder</stringValue>
         </value>
     </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>FREE_FORM_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
     <processType>AutoLaunchedFlow</processType>
     <recordCreates>
         <name>CreateCase</name>
         <label>Create Support Case</label>
-        <locationX>50</locationX>
-        <locationY>200</locationY>
+        <locationX>166</locationX>
+        <locationY>524</locationY>
         <connector>
             <targetReference>GetCreatedCase</targetReference>
         </connector>
@@ -175,6 +240,12 @@
             </value>
         </inputAssignments>
         <inputAssignments>
+            <field>SuppliedName</field>
+            <value>
+                <elementReference>admin_name</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
             <field>Type</field>
             <value>
                 <elementReference>issue_type</elementReference>
@@ -192,8 +263,8 @@
     <recordLookups>
         <name>GetCreatedCase</name>
         <label>Get Case Number</label>
-        <locationX>50</locationX>
-        <locationY>300</locationY>
+        <locationX>163</locationX>
+        <locationY>653</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>SetSuccess</targetReference>
@@ -218,15 +289,23 @@
     </recordLookups>
     <start>
         <locationX>50</locationX>
-        <locationY>0</locationY>
+        <locationY>50</locationY>
         <connector>
-            <targetReference>PredictCaseFields</targetReference>
+            <targetReference>CheckUserValues</targetReference>
         </connector>
     </start>
     <status>Active</status>
     <variables>
         <description>Account ID of the customer organisation</description>
         <name>account_id</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <description>Name of the customer admin (display-only, passed to the Lightning Type editor)</description>
+        <name>admin_name</name>
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>true</isInput>
@@ -314,6 +393,22 @@
         <value>
             <booleanValue>false</booleanValue>
         </value>
+    </variables>
+    <variables>
+        <description>User-confirmed priority from the case form (overrides prediction when provided)</description>
+        <name>user_priority</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <description>User-confirmed product area from the case form (overrides prediction when provided)</description>
+        <name>user_product_area</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
     </variables>
     <variables>
         <description>Workday module affected (HCM, Financials, Payroll, etc.)</description>

@@ -1,0 +1,14 @@
+{
+  "required" : [ "sessionId" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "sessionId" : {
+      "title" : "Session Id",
+      "description" : "Messaging Session ID",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

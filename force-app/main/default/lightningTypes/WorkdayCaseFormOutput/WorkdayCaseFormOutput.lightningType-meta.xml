@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningTypeBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>66.0</apiVersion>
+    <description>Output Lightning Type for case creation confirmation. Renders a success card with case number and details after case creation.</description>
+    <masterLabel>Workday Case Form Output</masterLabel>
+</LightningTypeBundle>
